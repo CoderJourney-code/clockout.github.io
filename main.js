@@ -53,6 +53,7 @@ function updateUI() {
     end_break_button.disabled = !on_break || !clocked_in || on_lunch;
     take_lunch_button.disabled = !clocked_in || on_lunch || on_break;
     end_lunch_button.disabled = !on_lunch || !clocked_in || on_break;
+    break_timer.hidden = !on_break && !on_lunch;
 
 
     if (clocked_in && !on_break && !on_lunch) {
@@ -114,14 +115,15 @@ function updateStorage() {
 
 
   
-let clock_in_button = document.getElementById("clock_in");
-let clock_out_button = document.getElementById("clock_out");
-let take_break_button = document.getElementById("take_break");
-let end_break_button = document.getElementById("end_break");
-let take_lunch_button = document.getElementById("take_lunch");
-let end_lunch_button = document.getElementById("end_lunch");
-let clock = document.getElementById("clock");
-let status_element = document.getElementById("status");
+const clock_in_button = document.getElementById("clock_in");
+const clock_out_button = document.getElementById("clock_out");
+const take_break_button = document.getElementById("take_break");
+const end_break_button = document.getElementById("end_break");
+const take_lunch_button = document.getElementById("take_lunch");
+const end_lunch_button = document.getElementById("end_lunch");
+const clock = document.getElementById("clock");
+const status_element = document.getElementById("status");
+const break_timer = document.getElementById("break_timer");
 
 clock_in_button.addEventListener("click", clock_in);
 clock_out_button.addEventListener("click", clock_out);
@@ -159,6 +161,7 @@ function take_lunch() {
     on_lunch = 1;
     updateUI();
     updateStorage();
+    startBreakTimer();
 
 }
 
@@ -176,6 +179,7 @@ function take_break() {
     on_break = 1;
     updateUI();
     updateStorage();
+    startBreakTimer();
 }
 
 
@@ -185,6 +189,28 @@ function end_break() {
     calculateBreakTime(break_start_time_data, break_end_time_data);
     updateUI();
     updateStorage();
+}
+
+let timer = null;
+function startBreakTimer() {
+    let seconds = 0;
+    let minutes = 0;
+    if (timer !== null) {
+        clearInterval(timer);
+        timer = null;
+    }
+
+    timer = setInterval(() => {
+        seconds++;
+        if (seconds === 60) {
+            seconds = 0;
+            minutes++;
+        }
+
+        let formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        break_timer.textContent = formattedTime;
+    }, 1000);
+    
 }
 
 function calculateBreakTime(start, end, regular_break=1) {
